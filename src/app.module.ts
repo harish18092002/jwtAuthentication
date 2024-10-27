@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './user-entity';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: 'postgres',
       password: 'root',
       database: 'mydb',
-      entities: [],
+      entities: [User],
       synchronize: true,
     }),
   ],
@@ -20,5 +21,3 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   providers: [AppService],
 })
 export class AppModule {}
-
-// export JWT_DB_URL="postgresql://postgres:root@localhost:5432/mydb?schema=public"
