@@ -21,6 +21,10 @@ export class AppService {
     }
   }
   async loginUser(data: signup): Promise<string> {
+    try {
+    } catch (e) {
+      throw new Error(`Error during login process : ${e}`);
+    }
     return 'Successfully logged In';
   }
 }
