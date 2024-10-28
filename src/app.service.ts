@@ -20,8 +20,12 @@ export class AppService {
       throw new Error(`Error creating user: ${error.message}`);
     }
   }
-  async loginUser(data: signup): Promise<string> {
+  async loginUser(data: signup) {
     try {
+      const query = `SELECT * FROM jwtusers WHERE username=$1 AND password=$2`;
+      const values = [data.username, data.password];
+      const result = await this.pool.query(query, values);
+      return result;
     } catch (e) {
       console.error(e);
       throw new Error(`Error during login process : ${e}`);
