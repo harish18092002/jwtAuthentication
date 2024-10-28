@@ -20,4 +20,7 @@ export class AppService {
       throw new Error(`Error creating user: ${error.message}`);
     }
   }
+  async loginUser(data: signup): Promise<string> {
+    return 'Successfully logged In';
+  }
 }

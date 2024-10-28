@@ -8,4 +8,9 @@ export class AppController {
   async signup(@Body() data: signup): Promise<string> {
     return await this.appService.createUser(data);
   }
+
+  @Post('login')
+  async login(@Body() data: signup): Promise<string> {
+    return await this.appService.loginUser(data);
+  }
 }
