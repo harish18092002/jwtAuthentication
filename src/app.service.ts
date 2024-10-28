@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Pool } from 'mysql2';
+
 const logger = new Logger('JWT-User-Service');
 
 @Injectable()
