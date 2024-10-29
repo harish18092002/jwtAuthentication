@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Pool } from 'mysql2/promise';
+import { Pool } from 'pg';
 
 interface SignupData {
   username: string;
@@ -12,35 +12,37 @@ export class AppService {
 
   async createUser(data: SignupData): Promise<string> {
     try {
-      const query = 'INSERT INTO jwtusers (username, password) VALUES (?, ?)';
+      const query =
+        'INSERT INTO jwtusers (username, password) VALUES ($1, $2) RETURNING *';
       const values = [data.username, data.password];
 
-      const [result] = await this.pool.execute(query, values);
-      console.log(`User created:`, result);
+      const result = await this.pool.query(query, values);
+      console.log(`User created:`, result.rows[0]);
 
       return 'User created successfully';
     } catch (error) {
       console.error(`Error creating user:`, error);
+      if (error.code === '23505') {
+        // PostgreSQL unique violation error code
+        throw new Error('Username already exists');
+      }
       throw new Error(`Error creating user: ${error.message}`);
     }
   }
 
   async loginUser(data: SignupData): Promise<any> {
     try {
-      // Fixed: Changed $1, $2 to ? for MySQL style parameters
       const query =
-        'SELECT * FROM jwtusers WHERE username = ? AND password = ?';
+        'SELECT * FROM jwtusers WHERE username = $1 AND password = $2';
       const values = [data.username, data.password];
 
-      // Using execute instead of query for better security with prepared statements
-      const [rows] = await this.pool.execute(query, values);
+      const result = await this.pool.query(query, values);
 
-      // Checking if rows is empty
-      if (!rows || (Array.isArray(rows) && rows.length === 0)) {
+      if (!result.rows || result.rows.length === 0) {
         return 'Incorrect credentials';
       }
 
-      return rows;
+      return result.rows[0]; // Return the first matching user
     } catch (error) {
       console.error(`Error during login process:`, error);
       throw new Error(`Error during login process: ${error.message}`);
