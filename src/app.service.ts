@@ -30,6 +30,5 @@ export class AppService {
       console.error(e);
       throw new Error(`Error during login process : ${e}`);
     }
-    return 'Successfully logged In';
   }
 }
