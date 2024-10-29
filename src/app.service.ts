@@ -22,10 +22,7 @@ export class AppService {
       return 'User created successfully';
     } catch (error) {
       console.error(`Error creating user:`, error);
-      if (error.code === '23505') {
-        // PostgreSQL unique violation error code
-        throw new Error('Username already exists');
-      }
+
       throw new Error(`Error creating user: ${error.message}`);
     }
   }
@@ -42,7 +39,7 @@ export class AppService {
         return 'Incorrect credentials';
       }
 
-      return result.rows[0]; // Return the first matching user
+      return result.rows[0];
     } catch (error) {
       console.error(`Error during login process:`, error);
       throw new Error(`Error during login process: ${error.message}`);
