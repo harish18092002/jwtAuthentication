@@ -13,6 +13,7 @@ export class AppService {
   async createUser(data: SignupData): Promise<string> {
     try {
       const oldUser = await this.loginUser(data);
+      console.debug(oldUser);
       if (oldUser) return 'User data already exists';
       const query =
         'INSERT INTO jwtusers (username, password) VALUES ($1, $2) RETURNING *';
