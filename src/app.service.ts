@@ -9,7 +9,6 @@ interface SignupData {
 @Injectable()
 export class AppService {
   constructor(@Inject('DATABASE_POOL') private pool: Pool) {}
-
   async createUser(data: SignupData): Promise<string> {
     try {
       const oldUser = await this.loginUser(data);
