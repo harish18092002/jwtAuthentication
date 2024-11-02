@@ -9,12 +9,11 @@ interface SignupData {
 @Injectable()
 export class AppService {
   constructor(@Inject('DATABASE_POOL') private pool: Pool) {}
-  async createUser(data: SignupData): Promise<string> {
+  async createUser(data: SignupData) {
     try {
       const oldUser = await this.loginUser(data);
 
-
-      if (oldUser) return 'User data already exists';
+      if (oldUser) return { msg: `User data already exists`, data: oldUser };
       const query =
         'INSERT INTO jwtusers (username, password) VALUES ($1, $2) RETURNING *';
       const values = [data.username, data.password];

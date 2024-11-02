@@ -5,7 +5,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Post('signup')
-  async signup(@Body() data: signup): Promise<string> {
+  async signup(@Body() data: signup) {
     return await this.appService.createUser(data);
   }
 
