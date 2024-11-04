@@ -38,7 +38,6 @@ export class AppService {
       const query =
         'SELECT * FROM jwtusers WHERE username = $1 AND password = $2';
       const values = [data.username, data.password];
-
       const result = await this.pool.query(query, values);
 
       if (!result.rows || result.rows.length === 0) {
