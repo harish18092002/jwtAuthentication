@@ -28,8 +28,7 @@ export class AppService {
       return `User created successfully : ${this.jwtService.sign(data)}`;
     } catch (error) {
       console.error(`Error creating user:`, error);
-
-      throw new Error(`Error creating user: ${error.message}`);
+      throw new Error(`Error creating user: ${error}`);
     }
   }
 
@@ -47,7 +46,7 @@ export class AppService {
       return result.rows[0];
     } catch (error) {
       console.error(`Error during login process:`, error);
-      throw new Error(`Error during login process: ${error.message}`);
+      throw new Error(`Error during login process: ${error}`);
     }
   }
 }
