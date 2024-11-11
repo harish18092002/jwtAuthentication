@@ -41,6 +41,9 @@ export class AppService {
         return 'Incorrect credentials';
       }
 
+      // 1.First extract only the needed data
+      // 2.Then use jwt to signup
+
       return result.rows[0];
     } catch (error) {
       throw new Error(`Error during login process: ${error}`);
