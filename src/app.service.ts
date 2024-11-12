@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Pool } from 'pg';
+import * as argon2 from 'argon2';
 
 interface SignupData {
   username: string;
@@ -19,7 +20,8 @@ export class AppService {
       // if (oldUser) return { msg: `User data already exists`, data: oldUser };
       const query =
         'INSERT INTO jwtusers (username, password) VALUES ($1, $2) RETURNING *';
-      const values = [data.username, data.password];
+      const password = await argon2.hash(data.password);
+      const values = [data.username, password];
 
       const result = await this.pool.query(query, values);
       console.log(`User created:`, result.rows[0]);
@@ -40,7 +42,7 @@ export class AppService {
       if (!result.rows || result.rows.length === 0) {
         return 'Incorrect credentials';
       }
-
+      console.log(result.rows);
       // 1.First extract only the needed data
       // 2.Then use jwt to signup
 
