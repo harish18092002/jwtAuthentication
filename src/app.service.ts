@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Pool } from 'pg';
 import * as argon2 from 'argon2';
+import { generateID } from '@jetit/id';
 
 interface SignupData {
   username: string;
@@ -18,15 +19,20 @@ export class AppService {
     try {
       // const oldUser = await this.loginUser(data);
       // if (oldUser) return { msg: `User data already exists`, data: oldUser };
+      const userId = generateID('HEX');
       const query =
-        'INSERT INTO jwtusers (username, password) VALUES ($1, $2) RETURNING *';
+        'INSERT INTO jwtusers (id ,username, password) VALUES ($1, $2 ,$3) RETURNING *';
       const password = await argon2.hash(data.password);
-      const values = [data.username, password];
+      const values = [userId, data.username, password];
 
       const result = await this.pool.query(query, values);
       console.log(`User created:`, result.rows[0]);
 
-      return `User created successfully : ${this.jwtService.sign(data)}`;
+      return {
+        userId: userId,
+        message: `User created successfully `,
+        authToken: this.jwtService.sign(data),
+      };
     } catch (error) {
       throw new Error(`Error creating user: ${error}`);
     }
