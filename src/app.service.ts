@@ -4,9 +4,10 @@ import { Pool } from 'pg';
 import * as argon2 from 'argon2';
 import { generateID } from '@jetit/id';
 
-interface SignupData {
-  username: string;
-  password: string;
+interface signupData {
+  userId: string;
+  username?: string;
+  password?: string;
 }
 
 @Injectable()
@@ -15,7 +16,7 @@ export class AppService {
     @Inject('DATABASE_POOL') private pool: Pool,
     private jwtService: JwtService,
   ) {}
-  async createUser(data: SignupData) {
+  async createUser(data: signupData) {
     try {
       // const oldUser = await this.loginUser(data);
       // if (oldUser) return { msg: `User data already exists`, data: oldUser };
@@ -38,11 +39,10 @@ export class AppService {
     }
   }
 
-  async loginUser(data: SignupData): Promise<any> {
+  async loginUser(data: signupData): Promise<any> {
     try {
-      const query =
-        'SELECT * FROM jwtusers WHERE username = $1 AND password = $2';
-      const values = [data.username, data.password];
+      const query = 'SELECT * FROM jwtusers WHERE id = $1 ';
+      const values = [data.userId];
       const result = await this.pool.query(query, values);
 
       if (!result.rows || result.rows.length === 0) {
@@ -52,7 +52,10 @@ export class AppService {
       // 1.First extract only the needed data
       // 2.Then use jwt to signup
 
-      return result.rows[0];
+      return {
+        message: 'User fetched successfully',
+        userDetails: result.rows[0],
+      };
     } catch (error) {
       throw new Error(`Error during login process: ${error}`);
     }
