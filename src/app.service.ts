@@ -3,9 +3,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Pool } from 'pg';
 import * as argon2 from 'argon2';
 import { generateID } from '@jetit/id';
+import { TLogin, TSignup } from './interface';
 
 interface signupData {
   userId: string;
+  userToken?: string;
   username?: string;
   password?: string;
 }
@@ -16,7 +18,7 @@ export class AppService {
     @Inject('DATABASE_POOL') private pool: Pool,
     private jwtService: JwtService,
   ) {}
-  async createUser(data: signupData) {
+  async createUser(data: TSignup) {
     try {
       // const oldUser = await this.loginUser(data);
       // if (oldUser) return { msg: `User data already exists`, data: oldUser };
@@ -39,7 +41,7 @@ export class AppService {
     }
   }
 
-  async loginUser(data: signupData): Promise<any> {
+  async loginUser(data: TLogin): Promise<any> {
     try {
       const query = 'SELECT * FROM jwtusers WHERE id = $1 ';
       const values = [data.userId];
