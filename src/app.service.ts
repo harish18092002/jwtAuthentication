@@ -50,14 +50,10 @@ export class AppService {
 
       const result = await this.pool.query(query, values);
       console.log(result.rows);
-      if (result)
-        if (!result.rows || result.rows.length === 0) {
-          return 'Incorrect credentials';
-        }
-      console.log(result.rows);
-      // 1.First extract only the needed data
-      // 2.Then use jwt to signup
 
+      if (!result.rows || result.rows.length === 0) {
+        return 'Incorrect credentials';
+      }
       return {
         message: 'User fetched successfully',
         userDetails: result.rows[0],
