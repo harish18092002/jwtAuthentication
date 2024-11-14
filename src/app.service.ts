@@ -24,19 +24,19 @@ export class AppService {
       // const oldUser = await this.loginUser(data);
       // if (oldUser) return { msg: `User data already exists`, data: oldUser };
       const userId = generateID('HEX');
-
       const query =
         'INSERT INTO jwtusers (id ,username, password) VALUES ($1, $2 ,$3) RETURNING *';
       const password = await argon2.hash(data.password);
       const values = [userId, data.username, password];
-
-      const result = await this.pool.query(query, values);
-      console.log(`User created:`, result.rows[0]);
-
+      await this.pool.query(query, values);
+      const tokenData = {
+        username: data.username,
+        password: password,
+      };
       return {
         userId: userId,
         message: `User created successfully `,
-        authToken: this.jwtService.sign(data),
+        authToken: this.jwtService.sign(tokenData),
       };
     } catch (error) {
       throw new Error(`Error creating user: ${error}`);
