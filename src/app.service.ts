@@ -4,6 +4,7 @@ import { Pool } from 'pg';
 import * as argon2 from 'argon2';
 import { generateID } from '@jetit/id';
 import { TLogin, TSignup } from './interface';
+import { userInfo } from 'os';
 
 interface signupData {
   userId: string;
@@ -44,11 +45,11 @@ export class AppService {
 
   async loginUser(data: TLogin): Promise<any> {
     try {
-      const query = 'SELECT * FROM jwtusers WHERE id = $1 ';
+      const query = `SELECT * FROM jwtusers WHERE id =$1`;
       const values = [data.userId];
 
       const result = await this.pool.query(query, values);
-      console.log(result.rows[0]);
+      console.log(result.rows);
       if (result)
         if (!result.rows || result.rows.length === 0) {
           return 'Incorrect credentials';
