@@ -56,7 +56,10 @@ export class AppService {
       }
       return {
         message: 'User fetched successfully',
-        userDetails: result.rows[0],
+        userDetails: {
+          userId: result.rows[0].id,
+          username: result.rows[0].username,
+        },
       };
     } catch (error) {
       throw new Error(`Error during login process: ${error}`);
