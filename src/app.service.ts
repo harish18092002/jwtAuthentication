@@ -36,7 +36,7 @@ export class AppService {
       return {
         userId: userId,
         message: `User created successfully `,
-        authToken: this.jwtService.sign(tokenData),
+        authToken: this.jwtService.signAsync(tokenData),
       };
     } catch (error) {
       throw new Error(`Error creating user: ${error}`);
