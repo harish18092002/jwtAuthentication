@@ -46,11 +46,13 @@ export class AppService {
     try {
       const query = 'SELECT * FROM jwtusers WHERE id = $1 ';
       const values = [data.userId];
-      const result = await this.pool.query(query, values);
 
-      if (!result.rows || result.rows.length === 0) {
-        return 'Incorrect credentials';
-      }
+      const result = await this.pool.query(query, values);
+      console.log(result.rows[0]);
+      if (result)
+        if (!result.rows || result.rows.length === 0) {
+          return 'Incorrect credentials';
+        }
       console.log(result.rows);
       // 1.First extract only the needed data
       // 2.Then use jwt to signup
