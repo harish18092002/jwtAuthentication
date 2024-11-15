@@ -3,15 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Pool } from 'pg';
 import * as argon2 from 'argon2';
 import { generateID } from '@jetit/id';
-import { TLogin, TSignup } from './interface';
+import { TLogin, TLoginReturn, TSignup } from './interface';
 import { userInfo } from 'os';
-
-interface signupData {
-  userId: string;
-  userToken?: string;
-  username?: string;
-  password?: string;
-}
 
 @Injectable()
 export class AppService {
@@ -43,7 +36,7 @@ export class AppService {
     }
   }
 
-  async loginUser(data: TLogin): Promise<any> {
+  async loginUser(data: TLogin): Promise<TLoginReturn> {
     try {
       const query = `SELECT * FROM jwtusers WHERE id =$1`;
       const values = [data.userId];
@@ -52,14 +45,12 @@ export class AppService {
       console.log(result.rows);
 
       if (!result.rows || result.rows.length === 0) {
-        return 'Incorrect credentials';
+        return { message: 'Incorrect credentials' };
       }
       return {
         message: 'User fetched successfully',
-        userDetails: {
-          userId: result.rows[0].id,
-          username: result.rows[0].username,
-        },
+        userId: result.rows[0].id,
+        username: result.rows[0].username,
       };
     } catch (error) {
       throw new Error(`Error during login process: ${error}`);
