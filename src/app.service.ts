@@ -17,7 +17,7 @@ export class AppService {
       // const oldUser = await this.loginUser(data);
       // if (oldUser) return { msg: `User data already exists`, data: oldUser };
       const userId = generateID('HEX');
-      const query =
+      const query = 
         'INSERT INTO jwtusers (id ,username, password) VALUES ($1, $2 ,$3) RETURNING *';
       const password = await argon2.hash(data.password);
       const values = [userId, data.username, password];
