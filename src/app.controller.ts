@@ -13,7 +13,7 @@ export class AppController {
 
   @Post('login')
   async login(@Body() data: TLogin, @Headers('authorization') token: string) {
-    Logger.debug('Token recieved in controller is :- ', token);
+    Logger.debug('Token received in controller is :- ', token);
     return await this.appService.loginUser(data, token);
   }
 }

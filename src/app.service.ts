@@ -44,22 +44,25 @@ export class AppService {
       Logger.error(headerToken);
       if (!headerToken) return { message: 'Invalid token credentials' };
       const tokenCheck = await this.jwtService.verifyAsync(headerToken);
-
-      console.log('Token validations result is : ', tokenCheck);
-
       const query = `SELECT * FROM jwtusers WHERE id =$1`;
       const values = [data.userId];
-
       const result = await this.pool.query(query, values);
-      console.log(result.rows);
-
-      if (!result.rows || result.rows.length === 0) {
+      if (!result.rows || result.rows.length === 0)
         return { message: 'Incorrect credentials' };
-      }
+
+      if (
+        result.rows[0]?.username &&
+        tokenCheck?.username &&
+        result.rows[0].username === tokenCheck.username
+      )
+        return {
+          message: 'User fetched successfully',
+          userId: result.rows[0].id,
+          username: result.rows[0].username,
+        };
+
       return {
-        message: 'User fetched successfully',
-        userId: result.rows[0].id,
-        username: result.rows[0].username,
+        message: 'User fetched and token does not match',
       };
     } catch (error) {
       throw new Error(`Error during login process: ${error}`);
