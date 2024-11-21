@@ -41,7 +41,6 @@ export class AppService {
     try {
       const authService = new AuthService();
       const headerToken = await authService.extractToken(token);
-      Logger.error(headerToken);
       if (!headerToken) return { message: 'Invalid token credentials' };
       const tokenCheck = await this.jwtService.verifyAsync(headerToken);
       const query = `SELECT * FROM jwtusers WHERE id =$1`;
