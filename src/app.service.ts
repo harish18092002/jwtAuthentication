@@ -1,10 +1,11 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Pool } from 'pg';
 import * as argon2 from 'argon2';
 import { generateID } from '@jetit/id';
 import { TLogin, TLoginReturn, TSignup } from './interface';
 import { userInfo } from 'os';
+import { AuthService } from './auth/auth.service';
 
 @Injectable()
 export class AppService {
@@ -29,15 +30,23 @@ export class AppService {
       return {
         userId: userId,
         message: `User created successfully `,
-        authToken: this.jwtService.signAsync(tokenData),
+        authToken: await this.jwtService.signAsync(tokenData),
       };
     } catch (error) {
       throw new Error(`Error creating user: ${error}`);
     }
   }
 
-  async loginUser(data: TLogin): Promise<TLoginReturn> {
+  async loginUser(data: TLogin, token: string): Promise<TLoginReturn> {
     try {
+      const authService = new AuthService();
+      const headerToken = await authService.extractToken(token);
+      Logger.error(headerToken);
+      if (!headerToken) return { message: 'Invalid token credentials' };
+      const tokenCheck = await this.jwtService.verifyAsync(headerToken);
+
+      console.log('Token validations result is : ', tokenCheck);
+
       const query = `SELECT * FROM jwtusers WHERE id =$1`;
       const values = [data.userId];
 

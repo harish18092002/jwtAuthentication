@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Headers, Logger } from '@nestjs/common';
 import { AppService } from './app.service';
 import { TLogin, TSignup } from './interface';
 
@@ -12,7 +12,8 @@ export class AppController {
   }
 
   @Post('login')
-  async login(@Body() data: TLogin) {
-    return await this.appService.loginUser(data);
+  async login(@Body() data: TLogin, @Headers('authorization') token: string) {
+    Logger.debug('Token recieved in controller is :- ', token);
+    return await this.appService.loginUser(data, token);
   }
 }
