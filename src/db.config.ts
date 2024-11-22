@@ -1,4 +1,3 @@
-// database.module.ts
 import { Module, Global, OnModuleInit, Inject } from '@nestjs/common';
 import { Pool } from 'pg';
 

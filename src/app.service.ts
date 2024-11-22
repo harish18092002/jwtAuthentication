@@ -15,8 +15,15 @@ export class AppService {
   ) {}
   async createUser(data: TSignup) {
     try {
-      // const oldUser = await this.loginUser(data);
-      // if (oldUser) return { msg: `User data already exists`, data: oldUser };
+      const oldUserquery = `SELECT * FROM jwtusers WHERE username=$1`;
+
+      const oldUserValues = [data.username];
+      const oldUser = await this.pool.query(oldUserquery, oldUserValues);
+      if (oldUser.rows[0])
+        return {
+          message: 'User already exists with details',
+          User: oldUser.rows[0],
+        };
       const userId = generateID('HEX', '01');
       const query =
         'INSERT INTO jwtusers (id ,username, password) VALUES ($1, $2 ,$3) RETURNING *';
