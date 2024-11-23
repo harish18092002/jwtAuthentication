@@ -15,10 +15,10 @@ export class AppService {
   ) {}
   async createUser(data: TSignup) {
     try {
-      const oldUserquery = `SELECT * FROM jwtusers WHERE username=$1`;
+      const oldUserQuery = `SELECT * FROM jwtusers WHERE username=$1`;
 
       const oldUserValues = [data.username];
-      const oldUser = await this.pool.query(oldUserquery, oldUserValues);
+      const oldUser = await this.pool.query(oldUserQuery, oldUserValues);
       if (oldUser.rows[0])
         return {
           message: 'User already exists with details',
