@@ -38,11 +38,10 @@ export class AppService {
       const values = [userId, data.username, password];
       const newUser = await this.pool.query(query, values);
 
-      // Include important claims in the token
       const tokenPayload = {
-        sub: userId, // subject (user ID)
+        sub: userId,
         username: data.username,
-        iat: Math.floor(Date.now() / 1000), // issued at
+        iat: Math.floor(Date.now() / 1000),
       };
 
       const token = await this.jwtService.signAsync(tokenPayload);
@@ -63,13 +62,11 @@ export class AppService {
         throw new UnauthorizedException('No token provided');
       }
 
-      // Remove 'Bearer ' if present
       const headerToken = token.replace('Bearer ', '');
 
       try {
-        // This will throw if token is expired or invalid
         const tokenPayload = await this.jwtService.verifyAsync(headerToken, {
-          ignoreExpiration: false, // Explicitly check expiration
+          ignoreExpiration: false,
         });
 
         const query = `SELECT * FROM jwtusers WHERE id = $1`;
@@ -82,7 +79,6 @@ export class AppService {
 
         const user = result.rows[0];
 
-        // Verify token belongs to this user
         if (
           user.username !== tokenPayload.username ||
           user.id !== tokenPayload.sub
