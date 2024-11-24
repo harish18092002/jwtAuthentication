@@ -15,7 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           expiresIn: '30d',
         },
         verifyOptions: {
-          ignoreExpiration: false, // Important: Make sure we check expiration
+          ignoreExpiration: false,
         },
       }),
       inject: [ConfigService],
