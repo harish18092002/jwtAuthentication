@@ -1,11 +1,14 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Pool } from 'pg';
 import * as argon2 from 'argon2';
 import { generateID } from '@jetit/id';
 import { TLogin, TLoginReturn, TSignup } from './interface';
-import { userInfo } from 'os';
-import { AuthService } from './auth/auth.service';
 
 @Injectable()
 export class AppService {
@@ -13,31 +16,41 @@ export class AppService {
     @Inject('DATABASE_POOL') private pool: Pool,
     private jwtService: JwtService,
   ) {}
+
   async createUser(data: TSignup) {
     try {
       const oldUserQuery = `SELECT * FROM jwtusers WHERE username=$1`;
-
       const oldUserValues = [data.username];
       const oldUser = await this.pool.query(oldUserQuery, oldUserValues);
-      if (oldUser.rows[0])
+
+      if (oldUser.rows[0]) {
         return {
           message: 'User already exists with details',
           User: oldUser.rows[0],
         };
+      }
+
       const userId = generateID('HEX', '01');
-      const query =
-        'INSERT INTO jwtusers (id ,username, password) VALUES ($1, $2 ,$3) RETURNING *';
       const password = await argon2.hash(data.password);
+
+      const query =
+        'INSERT INTO jwtusers (id, username, password) VALUES ($1, $2, $3) RETURNING *';
       const values = [userId, data.username, password];
-      await this.pool.query(query, values);
-      const tokenData = {
+      const newUser = await this.pool.query(query, values);
+
+      // Include important claims in the token
+      const tokenPayload = {
+        sub: userId, // subject (user ID)
         username: data.username,
-        password: password,
+        iat: Math.floor(Date.now() / 1000), // issued at
       };
+
+      const token = await this.jwtService.signAsync(tokenPayload);
+
       return {
         userId: userId,
-        message: `User created successfully `,
-        authToken: await this.jwtService.signAsync(tokenData),
+        message: 'User created successfully',
+        authToken: token,
       };
     } catch (error) {
       throw new Error(`Error creating user: ${error}`);
@@ -46,31 +59,52 @@ export class AppService {
 
   async loginUser(data: TLogin, token: string): Promise<TLoginReturn> {
     try {
-      const authService = new AuthService();
-      const headerToken = await authService.extractToken(token);
-      if (!headerToken) return { message: 'Invalid token credentials' };
-      const tokenCheck = await this.jwtService.verifyAsync(headerToken);
-      const query = `SELECT * FROM jwtusers WHERE id =$1`;
-      const values = [data.userId];
-      const result = await this.pool.query(query, values);
-      if (!result.rows || result.rows.length === 0)
-        return { message: 'Incorrect credentials' };
+      if (!token) {
+        throw new UnauthorizedException('No token provided');
+      }
 
-      if (
-        result.rows[0]?.username &&
-        tokenCheck?.username &&
-        result.rows[0].username === tokenCheck.username
-      )
+      // Remove 'Bearer ' if present
+      const headerToken = token.replace('Bearer ', '');
+
+      try {
+        // This will throw if token is expired or invalid
+        const tokenPayload = await this.jwtService.verifyAsync(headerToken, {
+          ignoreExpiration: false, // Explicitly check expiration
+        });
+
+        const query = `SELECT * FROM jwtusers WHERE id = $1`;
+        const values = [data.userId];
+        const result = await this.pool.query(query, values);
+
+        if (!result.rows || result.rows.length === 0) {
+          throw new UnauthorizedException('User not found');
+        }
+
+        const user = result.rows[0];
+
+        // Verify token belongs to this user
+        if (
+          user.username !== tokenPayload.username ||
+          user.id !== tokenPayload.sub
+        ) {
+          throw new UnauthorizedException('Token does not match user');
+        }
+
         return {
           message: 'User fetched successfully',
-          userId: result.rows[0].id,
-          username: result.rows[0].username,
+          userId: user.id,
+          username: user.username,
         };
-
-      return {
-        message: 'User fetched and token does not match',
-      };
+      } catch (jwtError) {
+        if (jwtError.name === 'TokenExpiredError') {
+          throw new UnauthorizedException('Token has expired');
+        }
+        throw new UnauthorizedException('Invalid token');
+      }
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new Error(`Error during login process: ${error}`);
     }
   }

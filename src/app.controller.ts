@@ -1,6 +1,7 @@
 import { Body, Controller, Post, Headers, Logger } from '@nestjs/common';
 import { AppService } from './app.service';
 import { TLogin, TSignup } from './interface';
+import { AuthModule } from './auth/auth.module';
 
 @Controller()
 export class AppController {
