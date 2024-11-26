@@ -16,4 +16,12 @@ export class AppController {
   async login(@Body() data: TLogin, @Headers('authorization') token: string) {
     return await this.appService.loginUser(data, token);
   }
+
+  @Post('login')
+  async getAllUser(
+    @Body() adminId: string,
+    @Headers('authorization') token: string,
+  ) {
+    return await this.appService.getAllUsers(adminId, token);
+  }
 }
