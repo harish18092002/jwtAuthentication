@@ -41,6 +41,7 @@ export class AppService {
       const tokenPayload = {
         sub: userId,
         username: data.username,
+        role: data.role,
         iat: Math.floor(Date.now() / 1000),
       };
 
