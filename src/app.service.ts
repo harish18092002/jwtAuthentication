@@ -34,8 +34,8 @@ export class AppService {
       const password = await argon2.hash(data.password);
 
       const query =
-        'INSERT INTO jwtusers (id, username, password) VALUES ($1, $2, $3) RETURNING *';
-      const values = [userId, data.username, password];
+        'INSERT INTO jwtusers (id, username, password,role) VALUES ($1, $2, $3,$4) RETURNING *';
+      const values = [userId, data.username, password, data.role];
       const newUser = await this.pool.query(query, values);
 
       const tokenPayload = {
@@ -106,7 +106,7 @@ export class AppService {
     }
   }
 
-  async getAllUsers(userId: string, token: string): Promise<TLoginReturn> {
+  async getAllUsers(userId: string, token: string) {
     try {
       const headerToken = token.replace('Bearer ', '');
 
@@ -114,29 +114,22 @@ export class AppService {
         const tokenPayload = await this.jwtService.verifyAsync(headerToken, {
           ignoreExpiration: false,
         });
+        const payLoadRole: string = tokenPayload?.role;
+        if (payLoadRole.toLowerCase() != 'admin')
+          return {
+            message:
+              'Only admin can able to get all users give admin ID or token',
+          };
 
-        console.error(tokenPayload);
         const query = `SELECT * FROM jwtusers`;
-        const values = [userId];
-        const result = await this.pool.query(query, values);
 
-        if (!result.rows || result.rows.length === 0) {
-          throw new UnauthorizedException('User not found');
-        }
+        const result = await this.pool.query(query);
 
-        const user = result.rows[0];
-
-        if (
-          user.username !== tokenPayload.username ||
-          user.id !== tokenPayload.sub
-        ) {
-          throw new UnauthorizedException('Token does not match user');
-        }
+        const user = result.rows;
 
         return {
-          message: 'User fetched successfully',
-          userId: user.id,
-          username: user.username,
+          message: 'All users fetched successfully',
+          allUsers: user,
         };
       } catch (jwtError) {
         if (jwtError.name === 'TokenExpiredError') {
@@ -148,7 +141,7 @@ export class AppService {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      throw new Error(`Error during login process: ${error}`);
+      throw new Error(`Error during fetching process: ${error}`);
     }
   }
 }

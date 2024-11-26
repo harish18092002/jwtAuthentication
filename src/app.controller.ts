@@ -17,7 +17,7 @@ export class AppController {
     return await this.appService.loginUser(data, token);
   }
 
-  @Post('login')
+  @Post('getAllUsers')
   async getAllUser(
     @Body() adminId: string,
     @Headers('authorization') token: string,
