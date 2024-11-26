@@ -104,4 +104,50 @@ export class AppService {
       throw new Error(`Error during login process: ${error}`);
     }
   }
+
+  async getAllUsers(userId: string, token: string): Promise<TLoginReturn> {
+    try {
+      const headerToken = token.replace('Bearer ', '');
+
+      try {
+        const tokenPayload = await this.jwtService.verifyAsync(headerToken, {
+          ignoreExpiration: false,
+        });
+
+        console.error(tokenPayload);
+        const query = `SELECT * FROM jwtusers`;
+        const values = [userId];
+        const result = await this.pool.query(query, values);
+
+        if (!result.rows || result.rows.length === 0) {
+          throw new UnauthorizedException('User not found');
+        }
+
+        const user = result.rows[0];
+
+        if (
+          user.username !== tokenPayload.username ||
+          user.id !== tokenPayload.sub
+        ) {
+          throw new UnauthorizedException('Token does not match user');
+        }
+
+        return {
+          message: 'User fetched successfully',
+          userId: user.id,
+          username: user.username,
+        };
+      } catch (jwtError) {
+        if (jwtError.name === 'TokenExpiredError') {
+          throw new UnauthorizedException('Token has expired');
+        }
+        throw new UnauthorizedException('Invalid token');
+      }
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new Error(`Error during login process: ${error}`);
+    }
+  }
 }
