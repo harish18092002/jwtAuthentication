@@ -6,6 +6,7 @@ export type TLogin = {
 export type TSignup = {
   username: string;
   password: string;
+  role: string;
 };
 
 export type TLoginReturn = {
