@@ -122,7 +122,6 @@ export class AppService {
           };
 
         const query = `SELECT * FROM jwtusers`;
-
         const result = await this.pool.query(query);
 
         const user = result.rows;
