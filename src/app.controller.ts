@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Headers, Logger } from '@nestjs/common';
+import { Body, Controller, Post, Headers } from '@nestjs/common';
 import { AppService } from './app.service';
 import { TLogin, TSignup } from './interface';
 
